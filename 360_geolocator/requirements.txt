@@ -1,0 +1,18 @@
+# 360 Photo Geolocator
+# Core dependencies
+fastkml>=1.0.0          # KML parsing
+shapely>=2.0.0          # Geometry operations (path interpolation)
+geopy>=2.4.0            # Distance calculations
+Pillow>=10.0.0          # Image handling
+piexif>=1.1.3           # EXIF writing (embed GPS in photos)
+folium>=0.15.0          # Interactive map visualization
+tqdm>=4.66.0            # Progress bars
+
+# Optional: for map drawing UI
+PyQt6>=6.6.0            # GUI (same as mask generator)
+PyQt6-WebEngine>=6.6.0  # For embedded map preview (optional)
+
+# Optional: for visual refinement (advanced)
+# torch>=2.0.0
+# torchvision>=0.15.0
+# faiss-cpu>=1.7.4

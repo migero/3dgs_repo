@@ -1,0 +1,24 @@
+# Core dependencies
+numpy>=1.21.0
+opencv-python>=4.5.0
+Pillow>=8.0.0
+scipy>=1.7.0
+
+# GUI (optional)
+PyQt5>=5.15.0
+
+# CLI and utilities
+argparse>=1.4.0
+tqdm>=4.60.0
+
+# Video processing
+ffmpeg-python>=0.2.0
+
+# Data handling
+pandas>=1.3.0
+
+# Plotting (for visualization)
+matplotlib>=3.4.0
+
+# EXIF writing (for GPS embedding)
+piexif>=1.1.3
