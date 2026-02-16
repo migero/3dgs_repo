@@ -37,18 +37,17 @@ class ProcessingThread(QThread):
     finished = pyqtSignal(object)  # PipelineResult
     error = pyqtSignal(str)  # error message
     
-    def __init__(self, pipeline: MaskGenerationPipeline, image: np.ndarray, additional_mask: Optional[np.ndarray] = None):
+    def __init__(self, pipeline: MaskGenerationPipeline, image: np.ndarray):
         super().__init__()
         self.pipeline = pipeline
         self.image = image
-        self.additional_mask = additional_mask
     
     def run(self):
         try:
             self.pipeline.set_progress_callback(
                 lambda msg, prog: self.progress.emit(msg, prog)
             )
-            result = self.pipeline.process(self.image, additional_mask=self.additional_mask)
+            result = self.pipeline.process(self.image)
             self.finished.emit(result)
         except Exception as e:
             self.error.emit(str(e))
@@ -62,12 +61,11 @@ class BatchProcessingThread(QThread):
     finished = pyqtSignal(int, int, float)  # total processed, successful, total time
     error = pyqtSignal(str)  # error message
     
-    def __init__(self, config: 'PipelineConfig', folder_path: str, num_workers: int = None, additional_mask: Optional[np.ndarray] = None):
+    def __init__(self, config: 'PipelineConfig', folder_path: str, num_workers: int = None):
         super().__init__()
         self.config = config
         self.folder_path = folder_path
         self.num_workers = num_workers
-        self.additional_mask = additional_mask
         self._cancelled = False
     
     def cancel(self):
@@ -78,7 +76,7 @@ class BatchProcessingThread(QThread):
             from core.pipeline import BatchProcessor
             
             # Create batch processor with parallel workers
-            batch_processor = BatchProcessor(self.config, num_workers=self.num_workers, additional_mask=self.additional_mask)
+            batch_processor = BatchProcessor(self.config, num_workers=self.num_workers)
             
             self.progress.emit(
                 f"Starting batch processing with {batch_processor.num_workers} workers...",
@@ -171,7 +169,6 @@ class MaskGeneratorWindow(QMainWindow):
         self.pipeline: Optional[MaskGenerationPipeline] = None
         self.processing_thread: Optional[ProcessingThread] = None
         self.batch_thread: Optional[BatchProcessingThread] = None
-        self.additional_mask: Optional[np.ndarray] = None
         
         # Setup UI
         self._setup_ui()
@@ -232,13 +229,11 @@ class MaskGeneratorWindow(QMainWindow):
         
         self.load_btn = QPushButton("📂 Load Image")
         self.batch_btn = QPushButton("📁 Batch Process Folder")
-        self.mask_input_btn = QPushButton("➕ Add Input Mask")
         self.save_btn = QPushButton("💾 Save Mask")
         self.save_btn.setEnabled(False)
         
         file_layout.addWidget(self.load_btn)
         file_layout.addWidget(self.batch_btn)
-        file_layout.addWidget(self.mask_input_btn)
         file_layout.addWidget(self.save_btn)
         layout.addWidget(file_group)
         
@@ -258,13 +253,13 @@ class MaskGeneratorWindow(QMainWindow):
         view_layout.addWidget(QLabel("Horizontal Views:"), 0, 0)
         self.num_views_spin = QSpinBox()
         self.num_views_spin.setRange(4, 16)
-        self.num_views_spin.setValue(8)
+        self.num_views_spin.setValue(6)
         view_layout.addWidget(self.num_views_spin, 0, 1)
         
         view_layout.addWidget(QLabel("Pitch Levels:"), 1, 0)
         self.pitch_levels_spin = QSpinBox()
         self.pitch_levels_spin.setRange(1, 5)
-        self.pitch_levels_spin.setValue(1)
+        self.pitch_levels_spin.setValue(2)
         self.pitch_levels_spin.setToolTip("1 = horizon only, 3 = include up/down views")
         view_layout.addWidget(self.pitch_levels_spin, 1, 1)
         
@@ -275,51 +270,50 @@ class MaskGeneratorWindow(QMainWindow):
         self.fov_spin.setSuffix("°")
         view_layout.addWidget(self.fov_spin, 2, 1)
         
+        view_layout.addWidget(QLabel("View Resolution:"), 3, 0)
+        self.view_res_combo = QComboBox()
+        self.view_res_combo.addItems(["640px", "800px", "1024px", "1280px"])
+        self.view_res_combo.setCurrentIndex(2)  # Default to 1024px
+        self.view_res_combo.setToolTip("Resolution of each perspective view (higher = better quality, slower)")
+        view_layout.addWidget(self.view_res_combo, 3, 1)
+        
+        self.downward_view_check = QCheckBox("Include downward perspective")
+        self.downward_view_check.setChecked(False)
+        self.downward_view_check.setToolTip("Add a downward-facing view (looking straight down)")
+        view_layout.addWidget(self.downward_view_check, 4, 0, 1, 2)
+        
+        view_layout.addWidget(QLabel("Mask Upscale:"), 5, 0)
+        self.mask_upscale_combo = QComboBox()
+        self.mask_upscale_combo.addItems(["1x (Fast)", "2x (Better)", "4x (Best)"])
+        self.mask_upscale_combo.setCurrentIndex(1)  # Default to 2x
+        self.mask_upscale_combo.setToolTip("Upscale masks before stitching for better quality (slower)")
+        view_layout.addWidget(self.mask_upscale_combo, 5, 1)
+        
         layout.addWidget(view_group)
         
         # Detection settings
         detect_group = QGroupBox("Detection Settings")
         detect_layout = QGridLayout(detect_group)
         
-        # Segmenter type selection
-        detect_layout.addWidget(QLabel("Segmenter:"), 0, 0)
-        self.segmenter_combo = QComboBox()
-        segmenter_options = ["YOLO (Fast, GPU-optimized)"]
-        
-        # Check if Mask2Former is available
-        try:
-            from core.mask2former_segmenter import is_mask2former_available
-            if is_mask2former_available():
-                segmenter_options.append("Mask2Former (High quality, slower)")
-        except ImportError:
-            pass
-        
-        self.segmenter_combo.addItems(segmenter_options)
-        detect_layout.addWidget(self.segmenter_combo, 0, 1)
-        
-        detect_layout.addWidget(QLabel("Model:"), 1, 0)
+        detect_layout.addWidget(QLabel("Model:"), 0, 0)
         self.model_combo = QComboBox()
         self.model_combo.addItems([
             "yolo11n-seg.pt (Fast)",
             "yolo11s-seg.pt (Small)",
             "yolo11m-seg.pt (Medium)",
             "yolo11l-seg.pt (Large)",
-            "yolo11x-seg.pt (XLarge)",
-            "yolo26n-seg.pt (26 Nano - Fast)",
-            "yolo26s-seg.pt (26 Small)",
-            "yolo26m-seg.pt (26 Medium)",
-            "yolo26l-seg.pt (26 Large)",
-            "yolo26x-seg.pt (26 XLarge)"
+            "yolo11x-seg.pt (XLarge)"
         ])
-        detect_layout.addWidget(self.model_combo, 1, 1)
+        self.model_combo.setCurrentIndex(3)  # Default to Large
+        detect_layout.addWidget(self.model_combo, 0, 1)
         
-        detect_layout.addWidget(QLabel("Confidence:"), 2, 0)
+        detect_layout.addWidget(QLabel("Confidence:"), 1, 0)
         self.confidence_spin = QDoubleSpinBox()
         self.confidence_spin.setRange(0.1, 0.9)
         self.confidence_spin.setValue(0.35)  # Higher default to reduce false positives
         self.confidence_spin.setSingleStep(0.05)
         self.confidence_spin.setToolTip("Higher values reduce false positives (e.g., posters detected as people)")
-        detect_layout.addWidget(self.confidence_spin, 2, 1)
+        detect_layout.addWidget(self.confidence_spin, 1, 1)
         
         layout.addWidget(detect_group)
         
@@ -484,16 +478,11 @@ class MaskGeneratorWindow(QMainWindow):
         """Setup signal connections."""
         self.load_btn.clicked.connect(self._load_image)
         self.batch_btn.clicked.connect(self._batch_process)
-        self.mask_input_btn.clicked.connect(self._select_input_mask)
         self.save_btn.clicked.connect(self._save_mask)
         self.process_btn.clicked.connect(self._process_image)
         
         self.preset_combo.currentIndexChanged.connect(self._on_preset_changed)
         self.opacity_slider.valueChanged.connect(self._update_overlay)
-        
-        # Connect segmenter change to pipeline recreation
-        if hasattr(self, 'segmenter_combo'):
-            self.segmenter_combo.currentIndexChanged.connect(self._create_pipeline)
         
         self.select_all_btn.clicked.connect(self._select_all_classes)
         self.select_none_btn.clicked.connect(self._select_no_classes)
@@ -512,23 +501,26 @@ class MaskGeneratorWindow(QMainWindow):
         model_text = self.model_combo.currentText()
         model_name = model_text.split(" ")[0]
         
-        # Determine segmenter type
-        segmenter_type = "yolo"  # Default
-        if hasattr(self, 'segmenter_combo'):
-            segmenter_text = self.segmenter_combo.currentText()
-            if "Mask2Former" in segmenter_text:
-                segmenter_type = "mask2former"
+        # Get mask upscale factor
+        upscale_text = self.mask_upscale_combo.currentText()
+        upscale_factor = int(upscale_text.split("x")[0])
+        
+        # Get view resolution
+        view_res_text = self.view_res_combo.currentText()
+        view_res = int(view_res_text.replace("px", ""))
         
         config = PipelineConfig(
             num_horizontal_views=self.num_views_spin.value(),
             num_pitch_levels=self.pitch_levels_spin.value(),
             fov=float(self.fov_spin.value()),
+            view_size=(view_res, view_res),
             model_name=model_name,
             target_classes=target_classes,
             confidence_threshold=self.confidence_spin.value(),
             dilate_mask=self.dilate_check.isChecked(),
             feather_edges=self.feather_check.isChecked(),
-            segmenter_type=segmenter_type
+            include_downward_view=self.downward_view_check.isChecked(),
+            mask_upscale_factor=upscale_factor
         )
         
         self.pipeline = MaskGenerationPipeline(config)
@@ -536,20 +528,20 @@ class MaskGeneratorWindow(QMainWindow):
     def _on_preset_changed(self, index: int):
         """Handle preset selection change."""
         if index == 0:  # Default
-            self.num_views_spin.setValue(8)
-            self.pitch_levels_spin.setValue(1)
+            self.num_views_spin.setValue(6)
+            self.pitch_levels_spin.setValue(2)
             self.fov_spin.setValue(90)
-            self.model_combo.setCurrentIndex(0)
+            self.model_combo.setCurrentIndex(3)  # Large
         elif index == 1:  # Fast
             self.num_views_spin.setValue(4)
-            self.pitch_levels_spin.setValue(1)
+            self.pitch_levels_spin.setValue(2)
             self.fov_spin.setValue(90)
-            self.model_combo.setCurrentIndex(0)
+            self.model_combo.setCurrentIndex(0)  # Fast
         elif index == 2:  # Accurate
-            self.num_views_spin.setValue(12)
-            self.pitch_levels_spin.setValue(3)
-            self.fov_spin.setValue(75)
-            self.model_combo.setCurrentIndex(2)
+            self.num_views_spin.setValue(8)
+            self.pitch_levels_spin.setValue(2)
+            self.fov_spin.setValue(90)
+            self.model_combo.setCurrentIndex(4)  # XLarge
     
     def _load_image(self):
         """Load an equirectangular image."""
@@ -581,25 +573,6 @@ class MaskGeneratorWindow(QMainWindow):
             
             self.status_bar.showMessage(f"Loaded: {file_path}")
     
-    def _select_input_mask(self):
-        """Open file dialog to select an additional input mask image."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select Additional Input Mask (360 equirectangular)",
-            "",
-            "Images (*.png *.jpg *.jpeg *.tiff *.bmp);;All Files (*)"
-        )
-        if file_path:
-            mask = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-            if mask is None:
-                QMessageBox.warning(self, "Error", "Could not load mask image")
-                return
-            self.additional_mask = mask
-            self.status_bar.showMessage(f"Loaded additional mask: {file_path}")
-        else:
-            self.additional_mask = None
-            self.status_bar.showMessage("No additional mask selected")
-    
     def _save_mask(self):
         """Save the generated mask."""
         if self.current_result is None:
@@ -630,7 +603,7 @@ class MaskGeneratorWindow(QMainWindow):
         self.progress_bar.setValue(0)
         
         # Start processing thread
-        self.processing_thread = ProcessingThread(self.pipeline, self.current_image, self.additional_mask)
+        self.processing_thread = ProcessingThread(self.pipeline, self.current_image)
         self.processing_thread.progress.connect(self._on_progress)
         self.processing_thread.finished.connect(self._on_processing_finished)
         self.processing_thread.error.connect(self._on_processing_error)
@@ -747,7 +720,7 @@ class MaskGeneratorWindow(QMainWindow):
         
         # Start batch processing thread with config (uses parallel workers)
         num_workers = self.workers_spin.value()
-        self.batch_thread = BatchProcessingThread(self.pipeline.config, folder_path, num_workers, self.additional_mask)
+        self.batch_thread = BatchProcessingThread(self.pipeline.config, folder_path, num_workers)
         self.batch_thread.progress.connect(self._on_batch_progress)
         self.batch_thread.file_completed.connect(self._on_batch_file_completed)
         self.batch_thread.finished.connect(self._on_batch_finished)

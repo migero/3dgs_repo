@@ -1,0 +1,277 @@
+using System.Runtime.CompilerServices;
+
+namespace GoPro.Core.Cloud
+{
+	public interface Api
+	{
+		public interface Collections
+		{
+			public interface Media
+			{
+				unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002Emedia_002E_003FA0x9f6e259c_002Eget));
+
+				unsafe static string Remove = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002Emedia_002E_003FA0x9f6e259c_002Eremove));
+
+				unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002Emedia_002E_003FA0x9f6e259c_002Eupdate));
+			}
+
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Destroy = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Edestroy));
+
+			unsafe static string Index = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Eindex));
+
+			unsafe static string Playurl = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Eplayurl));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Ecollections_002E_003FA0x9f6e259c_002Eupdate));
+		}
+
+		public interface Devices
+		{
+			public interface Settings
+			{
+				unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002Esettings_002E_003FA0x9f6e259c_002Eget));
+
+				unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002Esettings_002E_003FA0x9f6e259c_002Eupdate));
+			}
+
+			unsafe static string Index = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Eindex));
+
+			unsafe static string LogUpload = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Elog_upload));
+
+			unsafe static string Provision = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Eprovision));
+
+			unsafe static string Token = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Etoken));
+
+			unsafe static string Associate = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Eassociate));
+
+			unsafe static string Authorize = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Eauthorize));
+
+			unsafe static string Disassociate = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Edisassociate));
+
+			unsafe static string Rules = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002E_003FA0x9f6e259c_002Erules));
+		}
+
+		public interface Status
+		{
+			unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002Estatus_002E_003FA0x9f6e259c_002Eget));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Edevices_002Estatus_002E_003FA0x9f6e259c_002Eupdate));
+		}
+
+		public interface Entitlements
+		{
+			unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eentitlements_002E_003FA0x9f6e259c_002Eget));
+		}
+
+		public interface Firmware
+		{
+			unsafe static string Catalog = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Efirmware_002E_003FA0x9f6e259c_002Ecatalog));
+
+			unsafe static string License = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Efirmware_002E_003FA0x9f6e259c_002Elicense));
+
+			unsafe static string ReleaseNotes = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Efirmware_002E_003FA0x9f6e259c_002Erelease_notes));
+		}
+
+		public interface Graphql
+		{
+			unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Egraphql_002E_003FA0x9f6e259c_002Eget));
+
+			unsafe static string Post = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Egraphql_002E_003FA0x9f6e259c_002Epost));
+		}
+
+		public interface Identity
+		{
+			unsafe static string PasswordReset = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002E_003FA0x9f6e259c_002Epassword_reset));
+
+			unsafe static string Link = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002E_003FA0x9f6e259c_002Elink));
+		}
+
+		public interface Images
+		{
+			unsafe static string Resize = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eimages_002E_003FA0x9f6e259c_002Eresize));
+
+			unsafe static string Variations = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eimages_002E_003FA0x9f6e259c_002Evariations));
+		}
+
+		public interface Moderations
+		{
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emoderations_002E_003FA0x9f6e259c_002Ecreate));
+		}
+
+		public interface Notifications
+		{
+			public interface Registration
+			{
+				unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002Eregistration_002E_003FA0x9f6e259c_002Ecreate));
+
+				unsafe static string Destroy = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002Eregistration_002E_003FA0x9f6e259c_002Edestroy));
+			}
+
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Destroy = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002E_003FA0x9f6e259c_002Edestroy));
+
+			unsafe static string Index = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002E_003FA0x9f6e259c_002Eindex));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Enotifications_002E_003FA0x9f6e259c_002Eupdate));
+		}
+
+		public interface Oauth2
+		{
+			unsafe static string Authorize = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eoauth2_002E_003FA0x9f6e259c_002Eauthorize));
+
+			unsafe static string Token = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eoauth2_002E_003FA0x9f6e259c_002Etoken));
+
+			unsafe static string TokenCheck = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eoauth2_002E_003FA0x9f6e259c_002Etoken_check));
+
+			unsafe static string TokenInfo = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eoauth2_002E_003FA0x9f6e259c_002Etoken_info));
+		}
+
+		public interface Subscriptions
+		{
+			public interface Apple
+			{
+				unsafe static string Receipt = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Eapple_002E_003FA0x9f6e259c_002Ereceipt));
+
+				unsafe static string Restore = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Eapple_002E_003FA0x9f6e259c_002Erestore));
+
+				unsafe static string Userid = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Eapple_002E_003FA0x9f6e259c_002Euserid));
+			}
+
+			unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Eget));
+
+			unsafe static string Cancel = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Ecancel));
+
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Upgrade = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Eupgrade));
+
+			unsafe static string Uncancel = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Euncancel));
+
+			unsafe static string Resubscribe = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002E_003FA0x9f6e259c_002Eresubscribe));
+		}
+
+		public interface Google
+		{
+			unsafe static string Receipt = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Egoogle_002E_003FA0x9f6e259c_002Ereceipt));
+
+			unsafe static string Restore = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Egoogle_002E_003FA0x9f6e259c_002Erestore));
+
+			unsafe static string Userid = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Esubscriptions_002Egoogle_002E_003FA0x9f6e259c_002Euserid));
+		}
+
+		public interface Users
+		{
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eusers_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Email = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eusers_002E_003FA0x9f6e259c_002Eemail));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eusers_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eidentity_002Eusers_002E_003FA0x9f6e259c_002Eupdate));
+		}
+
+		public interface Media
+		{
+			public interface Mce
+			{
+				unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Emce_002E_003FA0x9f6e259c_002Ecreate));
+			}
+
+			unsafe static string Clone = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eclone));
+
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Deleted = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Edeleted));
+
+			unsafe static string DeleteHistory = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Edelete_history));
+
+			unsafe static string Derivatives = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Ederivatives));
+
+			unsafe static string Destroy = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Edestroy));
+
+			unsafe static string Download = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Edownload));
+
+			unsafe static string DownloadZip = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Edownload_zip));
+
+			unsafe static string EditProxy = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eedit_proxy));
+
+			unsafe static string Feed = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Efeed));
+
+			unsafe static string Index = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eindex));
+
+			unsafe static string Moments = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Emoments));
+
+			unsafe static string NotReady = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Enot_ready));
+
+			unsafe static string Playurl = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eplayurl));
+
+			unsafe static string Process = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eprocess));
+
+			unsafe static string Reprocess = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Ereprocess));
+
+			unsafe static string Search = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Esearch));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Statistics = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Estatistics));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eupdate));
+
+			unsafe static string ViewCount = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002E_003FA0x9f6e259c_002Eview_count));
+		}
+
+		public interface Derivative
+		{
+			unsafe static string Search = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Ederivative_002E_003FA0x9f6e259c_002Esearch));
+		}
+
+		public interface Trim
+		{
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Etrim_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Etrim_002E_003FA0x9f6e259c_002Eshow));
+		}
+
+		public interface Upload
+		{
+			unsafe static string Init = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Eupload_002E_003FA0x9f6e259c_002Einit));
+
+			unsafe static string Complete = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Eupload_002E_003FA0x9f6e259c_002Ecomplete));
+		}
+
+		public interface Uploads
+		{
+			unsafe static string Authorizations = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Euploads_002E_003FA0x9f6e259c_002Eauthorizations));
+
+			unsafe static string Create = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Euploads_002E_003FA0x9f6e259c_002Ecreate));
+
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Euploads_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Euploads_002E_003FA0x9f6e259c_002Eupdate));
+		}
+
+		public interface Items
+		{
+			unsafe static string Mural = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Eitems_002E_003FA0x9f6e259c_002Emural));
+
+			unsafe static string Index = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Eitems_002E_003FA0x9f6e259c_002Eindex));
+
+			unsafe static string Get = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Emedia_002Eitems_002E_003FA0x9f6e259c_002Eget));
+		}
+
+		public interface Accounts
+		{
+			unsafe static string Show = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eaccounts_002E_003FA0x9f6e259c_002Eshow));
+
+			unsafe static string Update = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eaccounts_002E_003FA0x9f6e259c_002Eupdate));
+
+			unsafe static string Get2facode = _003CModule_003E.msclr_002Einterop_002Emarshal_as_003Cclass_0020System_003A_003AString_0020_005E_002Cchar_0020const_0020_002A_003E((sbyte**)System.Runtime.CompilerServices.Unsafe.AsPointer(ref _003CModule_003E.cloud_002Eapi_002Eaccounts_002E_003FA0x9f6e259c_002Eget_2facode));
+		}
+	}
+}

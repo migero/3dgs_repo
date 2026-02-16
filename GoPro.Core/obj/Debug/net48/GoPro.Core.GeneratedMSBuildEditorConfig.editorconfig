@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = GoPro.Core
+build_property.ProjectDir = /home/migero/projects/gopro360-converter/GoPro.Core/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 

@@ -1,0 +1,6 @@
+using std;
+
+namespace GoPro.Core.Common.System
+{
+	public unsafe delegate void VolumeChangedDelegate(vector_003Ccommon_003A_003Asystem_003A_003AVolumeData_002Cstd_003A_003Aallocator_003Ccommon_003A_003Asystem_003A_003AVolumeData_003E_0020_003E* data);
+}

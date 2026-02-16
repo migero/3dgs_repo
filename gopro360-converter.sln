@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoPro.Common", "GoPro.Common\GoPro.Common.csproj", "{F5605AC6-DCDE-FB4D-CD49-6A56937F15F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoPro.Core", "GoPro.Core\GoPro.Core.csproj", "{56F55055-AD29-946D-CA5D-FBB9053EB74F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5605AC6-DCDE-FB4D-CD49-6A56937F15F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5605AC6-DCDE-FB4D-CD49-6A56937F15F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5605AC6-DCDE-FB4D-CD49-6A56937F15F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5605AC6-DCDE-FB4D-CD49-6A56937F15F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F55055-AD29-946D-CA5D-FBB9053EB74F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F55055-AD29-946D-CA5D-FBB9053EB74F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F55055-AD29-946D-CA5D-FBB9053EB74F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F55055-AD29-946D-CA5D-FBB9053EB74F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE5623CB-EC88-498D-997A-75A9012D82FC}
+	EndGlobalSection
+EndGlobal

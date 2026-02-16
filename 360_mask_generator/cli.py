@@ -5,7 +5,7 @@ Command-line interface for 360 Mask Generator.
 Usage:
     python cli.py input.jpg -o mask.png
     python cli.py input.jpg -o mask.png --preset fast
-    python cli.py input.jpg -o mask.png --views 12 --model yolo26m-seg.pt
+    python cli.py input.jpg -o mask.png --views 12 --model yolo11m-seg.pt
 """
 
 import multiprocessing
@@ -55,12 +55,6 @@ def parse_args():
     )
     
     parser.add_argument(
-        "--input-mask",
-        default=None,
-        help="Path to an additional mask image (equirectangular, same size as input) to be applied after YOLO and stitching."
-    )
-    
-    parser.add_argument(
         "--preset",
         choices=["default", "fast", "accurate"],
         default="default",
@@ -91,33 +85,7 @@ def parse_args():
     parser.add_argument(
         "--model",
         default=None,
-        help="YOLO model to use (default: yolo11n-seg.pt). Supports YOLO11 (yolo11n/s/m/l/x-seg.pt) and YOLO26 (yolo26n/s/m/l/x-seg.pt)"
-    )
-    
-    parser.add_argument(
-        "--segmenter",
-        choices=["yolo", "mask2former"],
-        default="yolo",
-        help="Segmentation model type (default: yolo)"
-    )
-    
-    parser.add_argument(
-        "--mask2former-config",
-        default=None,
-        help="Mask2Former config file path (only used with --segmenter mask2former)"
-    )
-    
-    parser.add_argument(
-        "--mask2former-weights",
-        default=None,
-        help="Mask2Former model weights path (only used with --segmenter mask2former)"
-    )
-    
-    parser.add_argument(
-        "--mask2former-mode",
-        choices=["instance", "panoptic", "semantic"],
-        default="instance",
-        help="Mask2Former segmentation mode (default: instance)"
+        help="YOLO model to use (default: yolo11n-seg.pt)"
     )
     
     parser.add_argument(
@@ -189,17 +157,9 @@ def process_single_image(pipeline, input_path, output_path, args):
         print(f"Error: Could not load image: {input_path}")
         return None
     
-    # Load additional mask if provided
-    additional_mask = None
-    if getattr(args, 'input_mask', None):
-        additional_mask = cv2.imread(args.input_mask, cv2.IMREAD_GRAYSCALE)
-        if additional_mask is None:
-            print(f"Warning: Could not load input mask: {args.input_mask}")
-            additional_mask = None
-    
     # Process
     try:
-        result = pipeline.process(image, additional_mask=additional_mask)
+        result = pipeline.process(image)
     except Exception as e:
         print(f"Error during processing: {e}")
         return None
@@ -229,17 +189,9 @@ def process_batch(config, folder_path, args):
     
     print(f"Found {len(image_files)} images to process")
     
-    # Load additional mask if provided
-    additional_mask = None
-    if getattr(args, 'input_mask', None):
-        additional_mask = cv2.imread(args.input_mask, cv2.IMREAD_GRAYSCALE)
-        if additional_mask is None:
-            print(f"Warning: Could not load input mask: {args.input_mask}")
-            additional_mask = None
-    
     # Create batch processor with parallel workers
     num_workers = args.workers
-    batch_processor = BatchProcessor(config, num_workers=num_workers, additional_mask=additional_mask)
+    batch_processor = BatchProcessor(config, num_workers=num_workers)
     
     print(f"Using {batch_processor.num_workers} parallel workers")
     print()
@@ -312,13 +264,6 @@ def main():
     if args.threads:
         config.num_cpu_threads = args.threads
     
-    # Set segmenter type and options
-    config.segmenter_type = args.segmenter
-    if args.segmenter == "mask2former":
-        config.mask2former_config = args.mask2former_config
-        config.mask2former_weights = args.mask2former_weights
-        config.mask2former_mode = args.mask2former_mode
-    
     # Recreate pipeline with updated config
     pipeline = MaskGenerationPipeline(config)
     
@@ -355,17 +300,9 @@ def main():
         print(f"Error: Could not load image: {input_path}")
         sys.exit(1)
     
-    # Load additional mask if provided
-    additional_mask = None
-    if getattr(args, 'input_mask', None):
-        additional_mask = cv2.imread(args.input_mask, cv2.IMREAD_GRAYSCALE)
-        if additional_mask is None:
-            print(f"Warning: Could not load input mask: {args.input_mask}")
-            additional_mask = None
-    
     # Process
     try:
-        result = pipeline.process(image, additional_mask=additional_mask)
+        result = pipeline.process(image)
     except Exception as e:
         print(f"Error during processing: {e}")
         sys.exit(1)

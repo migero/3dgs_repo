@@ -28,8 +28,7 @@ COCO_CLASSES = [
 # Default classes for moving objects that should be masked
 # Note: Increase confidence threshold (0.4+) to reduce false positives on posters/paintings
 DEFAULT_MOVING_CLASSES = [
-    'person', 'bicycle', 'car', 'motorcycle', 'bus', 'train', 'truck',
-    'backpack', 'umbrella', 'handbag', 'suitcase'
+    'person', 'backpack', 'handbag', 'suitcase'
 ]
 
 
@@ -64,7 +63,7 @@ class YoloSegmenter:
         
         Args:
             model_name: Name of the YOLO model to use. 
-                       Options: yolo11n/s/m/l/x-seg.pt, yolo26n/s/m/l/x-seg.pt
+                       Options: yolo11n-seg, yolo11s-seg, yolo11m-seg, yolo11l-seg, yolo11x-seg
                        Or older: yolov8n-seg, yolov8s-seg, etc.
             target_classes: List of class names to detect. If None, uses DEFAULT_MOVING_CLASSES.
             confidence_threshold: Minimum confidence for detections.

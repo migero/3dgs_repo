@@ -5,19 +5,14 @@ numpy>=1.21.0
 opencv-python>=4.5.0
 Pillow>=9.0.0
 
-# YOLO segmentation - Ultralytics (for YOLO11 and YOLO26 models)
-ultralytics>=8.4.0
+# YOLO segmentation - Ultralytics
+ultralytics>=8.0.0
 
 # 360 image conversion
 py360convert>=1.0.0
 
 # Qt5 GUI
 PyQt5>=5.15.0
-
-# Optional dependencies for Mask2Former (install separately if needed)
-# detectron2 (follow installation instructions at https://detectron2.readthedocs.io/)
-# torch>=2.0.0
-# torchvision>=0.15.0
 
 # For GPU acceleration (optional - install separately if needed)
 # torch>=2.0.0

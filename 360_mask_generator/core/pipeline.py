@@ -14,12 +14,6 @@ from .perspective_projector import PerspectiveProjector, PerspectiveView
 from .yolo_segmenter import YoloSegmenter, SegmentationResult, DEFAULT_MOVING_CLASSES
 from .mask_stitcher import MaskStitcher, StitchingResult
 
-try:
-    from .mask2former_segmenter import Mask2FormerSegmenter, is_mask2former_available
-except ImportError:
-    Mask2FormerSegmenter = None
-    is_mask2former_available = lambda: False
-
 
 @dataclass
 class PipelineConfig:
@@ -31,20 +25,14 @@ class PipelineConfig:
     fov: float = 90.0
     view_size: Tuple[int, int] = (640, 640)
     pitch_range: Tuple[float, float] = (-30.0, 30.0)  # Skip extreme up/down
+    include_downward_view: bool = False  # Add a downward-facing perspective view
+    mask_upscale_factor: int = 1  # Upscale masks before stitching (1, 2, or 4)
     
     # YOLO settings
     model_name: str = "yolo11n-seg.pt"
     target_classes: List[str] = field(default_factory=lambda: DEFAULT_MOVING_CLASSES.copy())
     confidence_threshold: float = 0.35  # Higher default to reduce false positives on posters
     device: Optional[str] = None
-    
-    # Segmenter selection
-    segmenter_type: str = "yolo"  # "yolo" or "mask2former"
-    
-    # Mask2Former settings (used when segmenter_type="mask2former")
-    mask2former_config: Optional[str] = None
-    mask2former_weights: Optional[str] = None
-    mask2former_mode: str = "instance"  # "instance", "panoptic", "semantic"
     
     # Stitching settings
     blend_mode: str = 'max'  # 'max', 'average', 'weighted'
@@ -132,31 +120,17 @@ class MaskGenerationPipeline:
             fov=self.config.fov,
             view_size=self.config.view_size,
             pitch_range=self.config.pitch_range,
-            pitch_steps=self.config.num_pitch_levels
+            pitch_steps=self.config.num_pitch_levels,
+            include_downward_view=self.config.include_downward_view
         )
         
-        # Initialize segmenter based on type
-        if self.config.segmenter_type.lower() == "mask2former":
-            if Mask2FormerSegmenter is None or not is_mask2former_available():
-                raise ImportError("Mask2Former not available. Please ensure detectron2 is installed and Mask2Former is properly set up.")
-            
-            self.segmenter = Mask2FormerSegmenter(
-                config_file=self.config.mask2former_config,
-                model_weights=self.config.mask2former_weights,
-                target_classes=self.config.target_classes,
-                confidence_threshold=self.config.confidence_threshold,
-                mode=self.config.mask2former_mode,
-                device=self.config.device,
-                verbose=self.config.verbose
-            )
-        else:  # Default to YOLO
-            self.segmenter = YoloSegmenter(
-                model_name=self.config.model_name,
-                target_classes=self.config.target_classes,
-                confidence_threshold=self.config.confidence_threshold,
-                device=self.config.device,
-                verbose=self.config.verbose
-            )
+        self.segmenter = YoloSegmenter(
+            model_name=self.config.model_name,
+            target_classes=self.config.target_classes,
+            confidence_threshold=self.config.confidence_threshold,
+            device=self.config.device,
+            verbose=self.config.verbose
+        )
         
         self.stitcher = MaskStitcher(
             blend_mode=self.config.blend_mode,
@@ -182,14 +156,14 @@ class MaskGenerationPipeline:
     
     def load_model(self) -> bool:
         """
-        Pre-load the segmentation model.
+        Pre-load the YOLO model.
         
         Returns:
             True if successful.
         """
         return self.segmenter.load_model()
     
-    def process(self, equirect_image: np.ndarray, additional_mask: Optional[np.ndarray] = None) -> PipelineResult:
+    def process(self, equirect_image: np.ndarray) -> PipelineResult:
         """
         Run the full mask generation pipeline on an equirectangular image.
         
@@ -231,7 +205,28 @@ class MaskGenerationPipeline:
             )
             
             result = self.segmenter.segment(view.image)
+            
+            # TEST: Make downward view fully white to visualize coverage
+            if abs(view.pitch + 90.0) < 1.0:  # Downward view
+                h, w = view.image.shape[:2]
+                result.combined_mask = np.ones((h, w), dtype=np.float32)
+                print(f"[TEST] Downward view mask set to full white ({h}x{w})")
+            
             segmentation_results.append(result)
+        
+        # Keep original views and results for visualization
+        original_views = views
+        original_results = segmentation_results
+        
+        # Step 2.5: Upscale masks and views if needed
+        if self.config.mask_upscale_factor > 1:
+            self._report_progress(f"Upscaling masks {self.config.mask_upscale_factor}x...", 0.72)
+            views, segmentation_results = self._upscale_masks_and_views(
+                views, segmentation_results, self.config.mask_upscale_factor
+            )
+            # Adjust equirect shape for upscaled stitching
+            equirect_shape = (equirect_shape[0] * self.config.mask_upscale_factor,
+                             equirect_shape[1] * self.config.mask_upscale_factor)
         
         # Step 3: Stitch masks together (CPU-bound, uses threading internally)
         self._report_progress("Stitching masks...", 0.75)
@@ -242,6 +237,12 @@ class MaskGenerationPipeline:
         # Step 4: Post-processing
         self._report_progress("Post-processing...", 0.9)
         final_mask = stitch_result.combined_mask
+        
+        # Downscale mask back to original resolution if it was upscaled
+        if self.config.mask_upscale_factor > 1:
+            original_shape = (equirect_image.shape[0], equirect_image.shape[1])
+            final_mask = cv2.resize(final_mask, (original_shape[1], original_shape[0]), 
+                                   interpolation=cv2.INTER_LINEAR)
         
         if self.config.dilate_mask:
             final_mask = self.stitcher.dilate_mask(
@@ -256,25 +257,15 @@ class MaskGenerationPipeline:
                 feather_amount=self.config.feather_amount
             )
         
-        # Apply additional mask if provided (logical OR, after all post-processing)
-        if additional_mask is not None:
-            # Ensure mask is binary float32 and same shape
-            add_mask = additional_mask
-            if add_mask.shape != final_mask.shape:
-                add_mask = cv2.resize(add_mask, (final_mask.shape[1], final_mask.shape[0]), interpolation=cv2.INTER_NEAREST)
-            if add_mask.dtype != np.float32:
-                add_mask = (add_mask > 127).astype(np.float32) if add_mask.dtype == np.uint8 else add_mask.astype(np.float32)
-            final_mask = np.clip(final_mask + add_mask, 0, 1)
-        
         processing_time = time.time() - start_time
         self._report_progress("Complete!", 1.0)
         
         return PipelineResult(
             mask=final_mask,
-            confidence_map=stitch_result.confidence_map,
-            coverage_map=stitch_result.coverage_map,
-            perspective_views=views,
-            segmentation_results=segmentation_results,
+            confidence_map=stitch_result.confidence_map if self.config.mask_upscale_factor == 1 else cv2.resize(stitch_result.confidence_map, (equirect_image.shape[1], equirect_image.shape[0]), interpolation=cv2.INTER_LINEAR),
+            coverage_map=stitch_result.coverage_map if self.config.mask_upscale_factor == 1 else cv2.resize(stitch_result.coverage_map, (equirect_image.shape[1], equirect_image.shape[0]), interpolation=cv2.INTER_NEAREST),
+            perspective_views=original_views,
+            segmentation_results=original_results,
             processing_time=processing_time
         )
     
@@ -320,7 +311,96 @@ class MaskGenerationPipeline:
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
             views = list(executor.map(extract_single_view, view_params))
         
+        # Add downward-facing view if enabled
+        if self.projector.include_downward_view:
+            persp_img, x_map, y_map = self.projector._equirect_to_perspective(
+                equirect_image, 180.0, -70.0, self.projector.fov, view_w, view_h
+            )
+            downward_view = PerspectiveView(
+                image=persp_img,
+                yaw=180.0,
+                pitch=-70.0,
+                fov=self.projector.fov,
+                width=view_w,
+                height=view_h,
+                equirect_x_map=x_map,
+                equirect_y_map=y_map
+            )
+            views.append(downward_view)
+        
         return views
+    
+    def _upscale_masks_and_views(
+        self,
+        views: List[PerspectiveView],
+        segmentation_results: List[SegmentationResult],
+        scale_factor: int
+    ) -> Tuple[List[PerspectiveView], List[SegmentationResult]]:
+        """
+        Upscale perspective views and their masks for higher resolution stitching.
+        
+        Args:
+            views: List of perspective views
+            segmentation_results: List of segmentation results
+            scale_factor: Upscaling factor (2 or 4)
+            
+        Returns:
+            Tuple of (upscaled_views, upscaled_results)
+        """
+        upscaled_views = []
+        upscaled_results = []
+        
+        for view, result in zip(views, segmentation_results):
+            # Upscale coordinate maps - they map to upscaled equirect space
+            new_h = view.height * scale_factor
+            new_w = view.width * scale_factor
+            
+            # Resize coordinate maps and scale values to match upscaled equirect dimensions
+            x_map_upscaled = cv2.resize(view.equirect_x_map, (new_w, new_h), 
+                                       interpolation=cv2.INTER_LINEAR) * scale_factor
+            y_map_upscaled = cv2.resize(view.equirect_y_map, (new_w, new_h),
+                                       interpolation=cv2.INTER_LINEAR) * scale_factor
+            
+            # Upscale combined mask to match coordinate map size
+            mask_upscaled = cv2.resize(result.combined_mask, (new_w, new_h),
+                                      interpolation=cv2.INTER_LINEAR)
+            
+            # Upscale individual masks as well
+            masks_upscaled = []
+            for mask in result.masks:
+                mask_up = cv2.resize(mask, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+                masks_upscaled.append(mask_up)
+            
+            # Upscale perspective image as well (needed for proper dimensions)
+            image_upscaled = cv2.resize(view.image, (new_w, new_h),
+                                       interpolation=cv2.INTER_LINEAR)
+            
+            # Create upscaled view
+            upscaled_view = PerspectiveView(
+                image=image_upscaled,
+                yaw=view.yaw,
+                pitch=view.pitch,
+                fov=view.fov,
+                width=new_w,
+                height=new_h,
+                equirect_x_map=x_map_upscaled,
+                equirect_y_map=y_map_upscaled
+            )
+            
+            # Create upscaled result with all masks upscaled
+            upscaled_result = SegmentationResult(
+                masks=masks_upscaled,
+                class_ids=result.class_ids,
+                class_names=result.class_names,
+                confidences=result.confidences,
+                boxes=result.boxes,
+                combined_mask=mask_upscaled
+            )
+            
+            upscaled_views.append(upscaled_view)
+            upscaled_results.append(upscaled_result)
+        
+        return upscaled_views, upscaled_results
     
     def process_file(
         self, 
@@ -476,14 +556,14 @@ def _process_single_file(args):
     reloading the model for every single file.
     
     Args:
-        args: Tuple of (input_path, output_path, config_dict, add_mask_path)
+        args: Tuple of (input_path, output_path, config_dict)
         
     Returns:
         Tuple of (input_path, success, detections, processing_time, error_msg)
     """
     global _worker_pipeline, _worker_config_hash
     
-    input_path, output_path, config_dict, add_mask_path = args
+    input_path, output_path, config_dict = args
     
     try:
         # Check if we can reuse the cached pipeline
@@ -500,15 +580,8 @@ def _process_single_file(args):
         if image is None:
             return (input_path, False, 0, 0.0, "Could not load image")
         
-        # Load additional mask if provided
-        additional_mask = None
-        if add_mask_path:
-            additional_mask = cv2.imread(add_mask_path, cv2.IMREAD_GRAYSCALE)
-            if additional_mask is not None:
-                additional_mask = (additional_mask > 127).astype(np.float32)
-        
         # Process
-        result = _worker_pipeline.process(image, additional_mask=additional_mask)
+        result = _worker_pipeline.process(image)
         
         # Save mask
         result.save_mask(str(output_path))
@@ -536,8 +609,7 @@ class BatchProcessor:
         self, 
         config: PipelineConfig,
         num_workers: Optional[int] = None,
-        use_gpu: bool = True,
-        additional_mask: Optional[np.ndarray] = None
+        use_gpu: bool = True
     ):
         """
         Initialize batch processor.
@@ -547,11 +619,9 @@ class BatchProcessor:
             num_workers: Number of worker processes. None = auto (CPU count - 1)
             use_gpu: Whether to try using GPU. If True with multiple workers,
                     only 1 worker uses GPU, others use CPU.
-            additional_mask: Additional mask to apply to all images
         """
         self.config = config
         self.use_gpu = use_gpu
-        self.additional_mask = additional_mask
         
         # Detect if GPU is available
         gpu_available = False
@@ -667,17 +737,9 @@ class BatchProcessor:
         }
         
         work_items = []
-        add_mask_path = None
-        if self.additional_mask is not None:
-            # Save mask to temp file if not already a path
-            import tempfile
-            import os
-            fd, add_mask_path = tempfile.mkstemp(suffix='.png')
-            os.close(fd)
-            cv2.imwrite(add_mask_path, (self.additional_mask * 255).astype(np.uint8))
         for input_file in files_to_process:
             output_file = input_file.parent / f"{input_file.stem}_mask{input_file.suffix}"
-            work_items.append((str(input_file), str(output_file), config_dict, add_mask_path))
+            work_items.append((str(input_file), str(output_file), config_dict))
         
         # Process with worker pool
         total = len(work_items)

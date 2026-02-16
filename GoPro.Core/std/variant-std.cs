@@ -1,0 +1,12 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace std
+{
+	[StructLayout(LayoutKind.Sequential, Size = 48)]
+	[NativeCppClass]
+	internal struct variant_003Cstd_003A_003Amonostate_002Cstd_003A_003Ashared_ptr_003Ccommon_003A_003Aio_003A_003ASeekable_003E_002Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_002Ccommon_003A_003Ajson_003A_003Avalue_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+}

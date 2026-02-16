@@ -1,0 +1,90 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace std
+{
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020_0026_002C3_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020_0026_002C2_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Amonostate_0020_0026_0026_002C0_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Ashared_ptr_003Ccommon_003A_003Aio_003A_003ASeekable_003E_0020_0026_0026_002C1_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020_0026_0026_002C2_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Avector_003Ccommon_003A_003Ajson_003A_003Avalue_002Cstd_003A_003Aallocator_003Ccommon_003A_003Ajson_003A_003Avalue_003E_0020_003E_0020_0026_0026_002C1_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Avector_003Cstd_003A_003Apair_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_002Ccommon_003A_003Ajson_003A_003Avalue_003E_002Cstd_003A_003Aallocator_003Cstd_003A_003Apair_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_002Ccommon_003A_003Ajson_003A_003Avalue_003E_0020_003E_0020_003E_0020_0026_0026_002C2_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020_0026_0026_002C3_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Amonostate_0020const_0020_0026_002C0_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Ashared_ptr_003Ccommon_003A_003Aio_003A_003ASeekable_003E_0020const_0020_0026_002C1_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020const_0020_0026_002C2_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Avector_003Ccommon_003A_003Ajson_003A_003Avalue_002Cstd_003A_003Aallocator_003Ccommon_003A_003Ajson_003A_003Avalue_003E_0020_003E_0020const_0020_0026_002C1_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Avector_003Cstd_003A_003Apair_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_002Ccommon_003A_003Ajson_003A_003Avalue_003E_002Cstd_003A_003Aallocator_003Cstd_003A_003Apair_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_002Ccommon_003A_003Ajson_003A_003Avalue_003E_0020_003E_0020_003E_0020const_0020_0026_002C2_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+	[StructLayout(LayoutKind.Sequential, Size = 8)]
+	[NativeCppClass]
+	internal struct _Tagged_003Cstd_003A_003Abasic_string_003Cchar_002Cstd_003A_003Achar_traits_003Cchar_003E_002Cstd_003A_003Aallocator_003Cchar_003E_0020_003E_0020const_0020_0026_002C3_003E
+	{
+		private long _003Calignment_0020member_003E;
+	}
+}

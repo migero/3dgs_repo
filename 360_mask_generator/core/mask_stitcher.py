@@ -202,7 +202,7 @@ class MaskStitcher:
         if view.equirect_x_map is None or view.equirect_y_map is None:
             return equirect_mask
         
-        # Vectorized projection
+        # Vectorized projection (fast)
         x_flat = view.equirect_x_map.flatten()
         y_flat = view.equirect_y_map.flatten()
         mask_flat = mask.flatten().astype(np.float32)
@@ -213,6 +213,15 @@ class MaskStitcher:
         
         # Use np.maximum.at for accumulation
         np.maximum.at(equirect_mask, (y_idx, x_idx), mask_flat)
+        
+        # For extreme pitch views (near poles), fill small gaps with morphological closing
+        is_extreme = abs(view.pitch) > 90.0
+        if is_extreme and equirect_mask.max() > 0:
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            binary = (equirect_mask > 0.5).astype(np.uint8)
+            closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=1)
+            # Blend closed with original to preserve soft edges
+            equirect_mask = np.maximum(equirect_mask, closed.astype(np.float32) * 0.8)
         
         return equirect_mask
     

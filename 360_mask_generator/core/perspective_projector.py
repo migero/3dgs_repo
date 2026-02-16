@@ -41,7 +41,8 @@ class PerspectiveProjector:
         fov: float = 90.0,
         view_size: Tuple[int, int] = (640, 640),
         pitch_range: Tuple[float, float] = (-45.0, 45.0),
-        pitch_steps: int = 1
+        pitch_steps: int = 1,
+        include_downward_view: bool = False
     ):
         """
         Initialize the perspective projector.
@@ -58,6 +59,7 @@ class PerspectiveProjector:
         self.view_size = view_size
         self.pitch_range = pitch_range
         self.pitch_steps = pitch_steps
+        self.include_downward_view = include_downward_view
         
         # Calculate yaw angles for horizontal views
         self.yaw_angles = np.linspace(-180, 180, num_views, endpoint=False)
@@ -105,6 +107,24 @@ class PerspectiveProjector:
                     equirect_y_map=y_map
                 )
                 views.append(view)
+        
+        # Add downward-facing view if enabled
+        if self.include_downward_view:
+            persp_img, x_map, y_map = self._equirect_to_perspective(
+                equirect_img, 180.0, -70.0, self.fov, view_w, view_h
+            )
+            
+            view = PerspectiveView(
+                image=persp_img,
+                yaw=180.0,
+                pitch=-70.0,
+                fov=self.fov,
+                width=view_w,
+                height=view_h,
+                equirect_x_map=x_map,
+                equirect_y_map=y_map
+            )
+            views.append(view)
         
         return views
     
@@ -247,6 +267,9 @@ class PerspectiveProjector:
         
         Returns arrays (x_map, y_map) where each element contains the 
         equirectangular (x, y) coordinate that maps to that perspective pixel.
+        
+        Note: For extreme pitch angles (near ±90°), the mapping becomes 
+        challenging at the poles where longitude is undefined.
         """
         eq_h, eq_w = equirect_shape
         

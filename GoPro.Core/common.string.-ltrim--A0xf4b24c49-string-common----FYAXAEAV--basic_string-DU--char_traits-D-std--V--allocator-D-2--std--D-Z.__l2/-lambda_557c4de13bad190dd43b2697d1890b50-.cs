@@ -1,0 +1,11 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace common.@string._003Fltrim_0040_003FA0xf4b24c49_0040string_0040common_0040_0040_0024_0024FYAXAEAV_003F_0024basic_string_0040DU_003F_0024char_traits_0040D_0040std_0040_0040V_003F_0024allocator_0040D_00402_0040_0040std_0040_0040D_0040Z.__l2
+{
+	[StructLayout(LayoutKind.Sequential, Size = 1)]
+	[NativeCppClass]
+	internal struct _003Clambda_557c4de13bad190dd43b2697d1890b50_003E
+	{
+	}
+}
