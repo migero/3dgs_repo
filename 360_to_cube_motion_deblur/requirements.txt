@@ -1,0 +1,16 @@
+# Core dependencies
+PyQt5>=5.15.0
+numpy>=1.21.0
+opencv-python>=4.5.0
+Pillow>=9.0.0
+py360convert>=1.0.0
+
+# PVDNet dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+tensorboardX>=2.1
+termcolor>=1.1.0
+easydict>=1.9
+torch-optimizer>=0.1.0
+scikit-image>=0.18.1
+scikit-learn>=0.24.0
