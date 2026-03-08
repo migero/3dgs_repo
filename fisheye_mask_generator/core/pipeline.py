@@ -49,9 +49,19 @@ class PipelineConfig:
     
     # Logging
     verbose: bool = True  # Print model loading messages
+
+    # Person-centering and pose options
+    center_on_person: bool = False  # If True, find largest person and re-center views
+    pose_based_rotation: bool = False  # If True, use pose estimator to adjust final fisheye rotation
+    save_pose_images: bool = False  # Save images with pose visualization
+    pose_model_name: str = "yolov8n-pose.pt"  # Pose model name (ultralytics)
     
     # Performance
     num_cpu_threads: int = 0  # Number of threads for CPU work (0 = auto)
+    # Minimum required detections across all perspective views before accepting results.
+    # If the total detections across all views is less than this, the pipeline will
+    # attempt rotated views and rerun segmentation. Default is 2 (treat 0 or 1 as fail).
+    min_detections_required: int = 2
 
 
 @dataclass
@@ -214,10 +224,52 @@ class MaskGenerationPipeline:
                 print(f"[TEST] Downward view mask set to full white ({h}x{w})")
             
             segmentation_results.append(result)
+
+        # Optionally: find biggest person detection across all views
+        biggest_person_info = None
+        try:
+            # Search for 'person' class by name
+            for view, res in zip(views, segmentation_results):
+                for mask, cls_name, box, conf in zip(res.masks, res.class_names, res.boxes, res.confidences):
+                    if cls_name == 'person':
+                        area = float(mask.sum())
+                        # compute box center in perspective coords
+                        x1, y1, x2, y2 = box
+                        cx = int((x1 + x2) / 2.0)
+                        cy = int((y1 + y2) / 2.0)
+                        info = dict(view=view, result=res, area=area, center_px=(cx, cy), box=box, confidence=conf)
+                        if biggest_person_info is None or area > biggest_person_info['area']:
+                            biggest_person_info = info
+        except Exception:
+            biggest_person_info = None
         
         # Keep original views and results for visualization
         original_views = views
         original_results = segmentation_results
+
+        # If insufficient detections found across all views, attempt rotated views and re-run segmentation
+        total_detections = sum(len(sr.masks) for sr in segmentation_results)
+        if total_detections < self.config.min_detections_required:
+            # Try rotations in this order: 180, +90, -90
+            for yaw_offset in (180.0, 90.0, -90.0):
+                self._report_progress(f"No detections — retrying with yaw offset {yaw_offset}°...", 0.3)
+                # Re-extract views with yaw offset and re-run segmentation
+                rotated_views = self._extract_views_with_yaw_offset(equirect_image, yaw_offset, num_threads)
+                rotated_results = []
+                for i, view in enumerate(rotated_views):
+                    progress = 0.3 + 0.4 * (i / max(1, len(rotated_views)))
+                    self._report_progress(f"Segmenting rotated view {i+1}/{len(rotated_views)}...", progress)
+                    res = self.segmenter.segment(view.image)
+                    rotated_results.append(res)
+
+                total_detections = sum(len(sr.masks) for sr in rotated_results)
+                if total_detections > 0:
+                    # Found detections — use rotated results
+                    original_views = rotated_views
+                    original_results = rotated_results
+                    segmentation_results = rotated_results
+                    views = rotated_views
+                    break
         
         # Step 2.5: Upscale masks and views if needed
         if self.config.mask_upscale_factor > 1:
@@ -329,6 +381,68 @@ class MaskGenerationPipeline:
             )
             views.append(downward_view)
         
+        return views
+
+    def _extract_views_with_yaw_offset(
+        self,
+        equirect_image: np.ndarray,
+        yaw_offset: float,
+        num_threads: int
+    ) -> List[PerspectiveView]:
+        """
+        Extract perspective views but apply a yaw offset to all yaw angles.
+
+        This is used to retry segmentation when no detections are found
+        in the original orientation (e.g., rotate 180°, then ±90°).
+        """
+        from concurrent.futures import ThreadPoolExecutor
+
+        view_w, view_h = self.projector.view_size
+
+        # Create list of (yaw, pitch) combinations with offset
+        view_params = []
+        for pitch in self.projector.pitch_angles:
+            for yaw in self.projector.yaw_angles:
+                new_yaw = (yaw + yaw_offset) % 360.0
+                view_params.append((new_yaw, pitch))
+
+        def extract_single_view(params):
+            yaw, pitch = params
+            persp_img, x_map, y_map = self.projector._equirect_to_perspective(
+                equirect_image, yaw, pitch, self.projector.fov, view_w, view_h
+            )
+            return PerspectiveView(
+                image=persp_img,
+                yaw=yaw,
+                pitch=pitch,
+                fov=self.projector.fov,
+                width=view_w,
+                height=view_h,
+                equirect_x_map=x_map,
+                equirect_y_map=y_map
+            )
+
+        # Extract views in parallel using threads
+        with ThreadPoolExecutor(max_workers=num_threads) as executor:
+            views = list(executor.map(extract_single_view, view_params))
+
+        # Add downward-facing view if enabled (apply yaw offset as well)
+        if self.projector.include_downward_view:
+            persp_img, x_map, y_map = self.projector._equirect_to_perspective(
+                equirect_image, (180.0 + yaw_offset) % 360.0, -70.0, self.projector.fov, view_w, view_h
+            )
+            downward_view = PerspectiveView(
+                image=persp_img,
+                yaw=(180.0 + yaw_offset) % 360.0,
+                pitch=-70.0,
+                fov=self.projector.fov,
+                width=view_w,
+                height=view_h,
+                equirect_x_map=x_map,
+                equirect_y_map=y_map
+            )
+            views.append(downward_view)
+
         return views
     
     def _upscale_masks_and_views(
@@ -733,6 +847,10 @@ class BatchProcessor:
             'dilation_kernel_size': self.config.dilation_kernel_size,
             'feather_edges': self.config.feather_edges,
             'feather_amount': self.config.feather_amount,
+            'center_on_person': self.config.center_on_person,
+            'pose_based_rotation': self.config.pose_based_rotation,
+            'save_pose_images': self.config.save_pose_images,
+            'pose_model_name': self.config.pose_model_name,
             'verbose': False,  # Disable per-file logging in batch mode
             'num_cpu_threads': self.config.num_cpu_threads,
         }
@@ -814,19 +932,32 @@ class FisheyePipelineResult:
     perspective_views: List[PerspectiveView]  # Extracted views
     segmentation_results: List[SegmentationResult]  # Per-view segmentation
     processing_time: float  # Total processing time in seconds
+    front_image: Optional[np.ndarray] = None  # Rotated front fisheye image (if pose-based rotation applied)
+    back_image: Optional[np.ndarray] = None   # Rotated back fisheye image (if pose-based rotation applied)
     
-    def save_masks(self, front_path: str, back_path: str) -> None:
+    def save_masks(self, front_path: str, back_path: str, save_rotated_images: bool = True) -> None:
         """
         Save both fisheye masks to files.
         
         Args:
             front_path: Output path for front mask
             back_path: Output path for back mask
+            save_rotated_images: If True and images were rotated, save them too
         """
         front_uint8 = (self.front_mask * 255).astype(np.uint8)
         back_uint8 = (self.back_mask * 255).astype(np.uint8)
         cv2.imwrite(front_path, front_uint8)
         cv2.imwrite(back_path, back_uint8)
+        
+        # Save rotated input images if available
+        if save_rotated_images and self.front_image is not None and self.back_image is not None:
+            from pathlib import Path
+            # Generate paths for rotated images (e.g., front_rotated.jpg, back_rotated.jpg)
+            front_img_path = str(Path(front_path).with_name(Path(front_path).stem.replace('_front_mask', '_front_rotated') + '.jpg'))
+            back_img_path = str(Path(back_path).with_name(Path(back_path).stem.replace('_back_mask', '_back_rotated') + '.jpg'))
+            
+            cv2.imwrite(front_img_path, self.front_image)
+            cv2.imwrite(back_img_path, self.back_image)
 
 
 class FisheyeMaskGenerationPipeline:
@@ -917,6 +1048,184 @@ class FisheyeMaskGenerationPipeline:
         
         self.equirect_pipeline.set_progress_callback(scaled_progress)
         equirect_result = self.equirect_pipeline.process(equirect_image)
+
+        # Optional: center on the largest detected person and re-run pipeline
+        yaw_offset_applied = 0.0
+        roll_correction_deg = 0.0
+        pose_info = None
+        try:
+            cfg = self.config
+            if cfg.center_on_person or cfg.pose_based_rotation or cfg.save_pose_images:
+                # Project all person detections into equirectangular space and pick largest
+                largest = None
+                try:
+                    import numpy as _np
+                    eq_h, eq_w = equirect_image.shape[:2]
+
+                    for view, res in zip(equirect_result.perspective_views, equirect_result.segmentation_results):
+                        for mask, cls_name in zip(res.masks, res.class_names):
+                            if cls_name != 'person':
+                                continue
+
+                            # Project this perspective mask into equirectangular coordinates
+                            try:
+                                proj = self.equirect_pipeline.projector.project_mask_to_equirect_vectorized(
+                                    mask, view, (eq_h, eq_w)
+                                )
+                            except Exception:
+                                # Fallback to non-vectorized projection
+                                proj = self.equirect_pipeline.projector.project_mask_to_equirect(
+                                    mask, view, (eq_h, eq_w)
+                                )
+
+                            area = float(proj.sum())
+                            if area <= 0.0:
+                                continue
+
+                            # Compute centroid in equirect pixel coordinates
+                            ys, xs = _np.where(proj > 0.5)
+                            if ys.size == 0:
+                                # fallback: use mass centroid
+                                total = proj.sum()
+                                if total <= 0.0:
+                                    continue
+                                # compute weighted centroid
+                                coords_y = _np.arange(eq_h)[:, None]
+                                coords_x = _np.arange(eq_w)[None, :]
+                                cy = float((proj * coords_y).sum() / total)
+                                cx = float((proj * coords_x).sum() / total)
+                            else:
+                                cy = float(ys.mean())
+                                cx = float(xs.mean())
+
+                            if largest is None or area > largest['area']:
+                                largest = dict(area=area, eq_center=(cx, cy), proj=proj)
+
+                except Exception:
+                    largest = None
+
+                # Handle centering and rotation if person detected
+                if largest is not None and (cfg.center_on_person or cfg.pose_based_rotation):
+                    eq_cx, eq_cy = largest['eq_center']
+                    # Convert equirect pixel coords to lon/lat
+                    import numpy as _np
+                    lon = (eq_cx / eq_w * 2.0 - 1.0) * _np.pi
+                    lat = - (2.0 * eq_cy / eq_h - 1.0) * (_np.pi / 2.0)
+                    yaw_deg = float(_np.degrees(lon))
+                    pitch_deg = float(_np.degrees(lat))
+
+                    # Compute yaw offset to center person at yaw=0
+                    yaw_offset = -yaw_deg
+                    yaw_offset_applied = yaw_offset
+
+                    # Apply horizontal yaw rotation by rolling the equirect image
+                    shift_pixels = int(round((yaw_offset / 360.0) * eq_w))
+                    if shift_pixels != 0:
+                        rotated_equirect = _np.roll(equirect_image, shift_pixels, axis=1)
+                    else:
+                        rotated_equirect = equirect_image
+
+                    # Re-run pipeline on rotated equirect to get centered results
+                    self._report_progress("Re-centering on detected person and re-running pipeline...", 0.1)
+                    equirect_result = self.equirect_pipeline.process(rotated_equirect)
+
+                    # Run pose estimator on a centered perspective (yaw=0)
+                    if cfg.save_pose_images or cfg.pose_based_rotation:
+                        try:
+                            from .pose_estimator import PoseEstimator
+                            pe = PoseEstimator(model_name=cfg.pose_model_name, device=cfg.device, verbose=cfg.verbose)
+                            if pe.load_model():
+                                # extract small perspective centered at yaw=0, pitch=pitch_deg
+                                pp = self.equirect_pipeline.projector
+                                # keep same FOV as config
+                                view_w, view_h = pp.view_size
+                                persp_img, _, _ = pp._equirect_to_perspective(
+                                    rotated_equirect, 0.0, pitch_deg, pp.fov, view_w, view_h
+                                )
+                                poses = pe.estimate(persp_img)
+                                pose_info = dict(yaw_offset=yaw_offset, pitch_deg=pitch_deg, poses=poses)
+
+                                # Optionally save visualization
+                                if cfg.save_pose_images and poses:
+                                    import cv2 as _cv2, time as _time
+                                    vis = persp_img.copy()
+                                    # draw keypoints
+                                    for p in poses:
+                                        kps = p.get('keypoints')
+                                        if kps is None:
+                                            continue
+                                        for kp in kps:
+                                            x, y, c = int(kp[0]), int(kp[1]), float(kp[2])
+                                            if c > 0.05:
+                                                _cv2.circle(vis, (x, y), 3, (0, 255, 0), -1)
+                                    fname = f"pose_centered_{int(_time.time())}.png"
+                                    _cv2.imwrite(fname, vis)
+
+                                # If pose-based rotation requested, compute roll angle from keypoints
+                                if cfg.pose_based_rotation and poses:
+                                    # Try COCO indices: left_hip=11, right_hip=12, left_shoulder=5, right_shoulder=6
+                                    kps = poses[0].get('keypoints')
+                                    if kps is not None and kps.shape[0] >= 13:
+                                        try:
+                                            lh = kps[11][:2]
+                                            rh = kps[12][:2]
+                                            ls = kps[5][:2]
+                                            rs = kps[6][:2]
+                                            mid_hips = (_np.array(lh) + _np.array(rh)) / 2.0
+                                            mid_shoulders = (_np.array(ls) + _np.array(rs)) / 2.0
+                                            vec = mid_shoulders - mid_hips
+                                            angle_rad = _np.arctan2(vec[1], vec[0])
+                                            roll_deg = _np.degrees(angle_rad) - 90.0
+                                            roll_correction_deg = float(roll_deg)
+                                        except Exception:
+                                            roll_correction_deg = 0.0
+                        except Exception:
+                            pass
+                
+                # If only save_pose_images is enabled (without centering), run pose estimation on original equirect
+                elif cfg.save_pose_images and largest is not None:
+                    try:
+                        from .pose_estimator import PoseEstimator
+                        import numpy as _np
+                        
+                        eq_cx, eq_cy = largest['eq_center']
+                        lon = (eq_cx / eq_w * 2.0 - 1.0) * _np.pi
+                        lat = - (2.0 * eq_cy / eq_h - 1.0) * (_np.pi / 2.0)
+                        yaw_deg = float(_np.degrees(lon))
+                        pitch_deg = float(_np.degrees(lat))
+                        
+                        pe = PoseEstimator(model_name=cfg.pose_model_name, device=cfg.device, verbose=cfg.verbose)
+                        if pe.load_model():
+                            pp = self.equirect_pipeline.projector
+                            view_w, view_h = pp.view_size
+                            persp_img, _, _ = pp._equirect_to_perspective(
+                                equirect_image, yaw_deg, pitch_deg, pp.fov, view_w, view_h
+                            )
+                            poses = pe.estimate(persp_img)
+                            
+                            if poses:
+                                import cv2 as _cv2, time as _time
+                                vis = persp_img.copy()
+                                # draw keypoints
+                                for p in poses:
+                                    kps = p.get('keypoints')
+                                    if kps is None:
+                                        continue
+                                    for kp in kps:
+                                        x, y, c = int(kp[0]), int(kp[1]), float(kp[2])
+                                        if c > 0.05:
+                                            _cv2.circle(vis, (x, y), 3, (0, 255, 0), -1)
+                                fname = f"pose_vis_{int(_time.time())}.png"
+                                _cv2.imwrite(fname, vis)
+                                if cfg.verbose:
+                                    print(f"Saved pose visualization: {fname}")
+                    except Exception as e:
+                        if cfg.verbose:
+                            print(f"Pose visualization failed: {e}")
+                        pass
+                        
+        except Exception:
+            pass
         
         # Step 3: Convert equirectangular mask back to fisheye pair
         self._report_progress("Converting mask to fisheye format...", 0.90)
@@ -930,6 +1239,50 @@ class FisheyeMaskGenerationPipeline:
             fisheye_size=fisheye_size
         )
         
+        # If equirectangular was rotated by ~180° (person in back fisheye), swap front/back
+        if abs(yaw_offset_applied) > 90:  # Rotated to back hemisphere
+            if self.config.verbose:
+                print(f"Swapping front/back fisheye due to {yaw_offset_applied:.1f}° rotation")
+            front_mask, back_mask = back_mask, front_mask
+            # Also need to swap the original input images for consistent output
+            front_fisheye, back_fisheye = back_fisheye, front_fisheye
+
+        # Apply roll correction to final fisheye masks if requested
+        rotated_front_image = None
+        rotated_back_image = None
+        
+        if roll_correction_deg and abs(roll_correction_deg) > 0.5:
+            try:
+                import cv2 as _cv2, numpy as _np
+                def rotate_image(img, angle_deg):
+                    """Rotate an image (mask or RGB) by angle_deg."""
+                    h, w = img.shape[:2]
+                    M = _cv2.getRotationMatrix2D((w/2.0, h/2.0), angle_deg, 1.0)
+                    
+                    if len(img.shape) == 2:  # Grayscale/mask
+                        rotated = _cv2.warpAffine((img*255).astype(_np.uint8), M, (w, h), 
+                                                  flags=_cv2.INTER_LINEAR, 
+                                                  borderMode=_cv2.BORDER_CONSTANT, borderValue=0)
+                        return (rotated.astype(_np.float32) / 255.0)
+                    else:  # RGB image
+                        rotated = _cv2.warpAffine(img, M, (w, h), 
+                                                  flags=_cv2.INTER_LINEAR, 
+                                                  borderMode=_cv2.BORDER_CONSTANT, borderValue=0)
+                        return rotated
+
+                # Rotate both masks AND input images
+                front_mask = rotate_image(front_mask, roll_correction_deg)
+                back_mask = rotate_image(back_mask, roll_correction_deg)
+                rotated_front_image = rotate_image(front_fisheye, roll_correction_deg)
+                rotated_back_image = rotate_image(back_fisheye, roll_correction_deg)
+                
+                if self.config.verbose:
+                    print(f"Applied pose-based rotation: {roll_correction_deg:.2f}° to input images and masks")
+            except Exception as e:
+                if self.config.verbose:
+                    print(f"Failed to apply pose-based rotation: {e}")
+                pass
+        
         processing_time = time.time() - start_time
         self._report_progress("Complete!", 1.0)
         
@@ -940,7 +1293,9 @@ class FisheyeMaskGenerationPipeline:
             equirect_image=equirect_image,
             perspective_views=equirect_result.perspective_views,
             segmentation_results=equirect_result.segmentation_results,
-            processing_time=processing_time
+            processing_time=processing_time,
+            front_image=rotated_front_image,
+            back_image=rotated_back_image
         )
     
     def process_files(
@@ -1237,6 +1592,10 @@ class FisheyeBatchProcessor:
             'dilation_kernel_size': self.config.dilation_kernel_size,
             'feather_edges': self.config.feather_edges,
             'feather_amount': self.config.feather_amount,
+            'center_on_person': self.config.center_on_person,
+            'pose_based_rotation': self.config.pose_based_rotation,
+            'save_pose_images': self.config.save_pose_images,
+            'pose_model_name': self.config.pose_model_name,
             'verbose': False,
             'num_cpu_threads': self.config.num_cpu_threads,
         }
@@ -1379,6 +1738,10 @@ class FisheyeBatchProcessor:
             'dilation_kernel_size': self.config.dilation_kernel_size,
             'feather_edges': self.config.feather_edges,
             'feather_amount': self.config.feather_amount,
+            'center_on_person': self.config.center_on_person,
+            'pose_based_rotation': self.config.pose_based_rotation,
+            'save_pose_images': self.config.save_pose_images,
+            'pose_model_name': self.config.pose_model_name,
             'verbose': False,
             'num_cpu_threads': self.config.num_cpu_threads,
         }

@@ -242,10 +242,18 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
             self.status_bar.showMessage("Ready. Load a fisheye image pair to begin.")
     
     def _create_left_panel(self) -> QWidget:
-        """Create the left control panel."""
+        """Create the left control panel with scrollbar."""
+        # Create scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        # Create content widget that will be scrollable
         panel = QWidget()
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
         
         # File controls
         file_group = QGroupBox("File")
@@ -253,10 +261,18 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         
         self.load_btn = QPushButton("📂 Load Fisheye Pair")
         self.load_btn.setToolTip("Load front fisheye image (back will be auto-detected)")
+        self.load_btn.setMinimumHeight(35)
+        self.load_btn.setMaximumHeight(35)
+        
         self.batch_btn = QPushButton("📁 Batch Process Folder")
         self.batch_btn.setToolTip("Process all fisheye pairs in a folder")
+        self.batch_btn.setMinimumHeight(35)
+        self.batch_btn.setMaximumHeight(35)
+        
         self.save_btn = QPushButton("💾 Save Masks")
         self.save_btn.setEnabled(False)
+        self.save_btn.setMinimumHeight(35)
+        self.save_btn.setMaximumHeight(35)
         
         file_layout.addWidget(self.load_btn)
         file_layout.addWidget(self.batch_btn)
@@ -322,13 +338,35 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         detect_layout.addWidget(QLabel("Model:"), 0, 0)
         self.model_combo = QComboBox()
         self.model_combo.addItems([
-            "yolo11n-seg.pt (Fast)",
-            "yolo11s-seg.pt (Small)",
-            "yolo11m-seg.pt (Medium)",
-            "yolo11l-seg.pt (Large)",
-            "yolo11x-seg.pt (XLarge)"
+            "yolo26n-seg.pt (YOLO26 Nano - NEW)",
+            "yolo26s-seg.pt (YOLO26 Small - NEW)",
+            "yolo26m-seg.pt (YOLO26 Medium - NEW)",
+            "yolo26l-seg.pt (YOLO26 Large - NEW)",
+            "yolo26x-seg.pt (YOLO26 XLarge - NEW)",
+            "---",
+            "yolo11n-seg.pt (YOLO11 Nano)",
+            "yolo11s-seg.pt (YOLO11 Small)",
+            "yolo11m-seg.pt (YOLO11 Medium)",
+            "yolo11l-seg.pt (YOLO11 Large)",
+            "yolo11x-seg.pt (YOLO11 XLarge)",
+            "---",
+            "yolov10n-seg.pt (YOLOv10 Nano)",
+            "yolov10s-seg.pt (YOLOv10 Small)",
+            "yolov10m-seg.pt (YOLOv10 Medium)",
+            "yolov10l-seg.pt (YOLOv10 Large)",
+            "yolov10x-seg.pt (YOLOv10 XLarge)",
+            "---",
+            "yolov9c-seg.pt (YOLOv9 Compact)",
+            "yolov9e-seg.pt (YOLOv9 Extended)",
+            "---",
+            "yolov8n-seg.pt (YOLOv8 Nano)",
+            "yolov8s-seg.pt (YOLOv8 Small)",
+            "yolov8m-seg.pt (YOLOv8 Medium)",
+            "yolov8l-seg.pt (YOLOv8 Large)",
+            "yolov8x-seg.pt (YOLOv8 XLarge)"
         ])
-        self.model_combo.setCurrentIndex(3)  # Default to Large
+        self.model_combo.setCurrentIndex(4)  # Default to YOLO26 XLarge (newest and most accurate)
+        self.model_combo.currentIndexChanged.connect(self._on_model_changed)
         detect_layout.addWidget(self.model_combo, 0, 1)
         
         detect_layout.addWidget(QLabel("Confidence:"), 1, 0)
@@ -359,8 +397,11 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         # Quick select buttons
         quick_btns = QHBoxLayout()
         self.select_all_btn = QPushButton("All")
+        self.select_all_btn.setMaximumHeight(30)
         self.select_none_btn = QPushButton("None")
+        self.select_none_btn.setMaximumHeight(30)
         self.select_moving_btn = QPushButton("Moving")
+        self.select_moving_btn.setMaximumHeight(30)
         quick_btns.addWidget(self.select_all_btn)
         quick_btns.addWidget(self.select_none_btn)
         quick_btns.addWidget(self.select_moving_btn)
@@ -382,6 +423,42 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         
         layout.addWidget(post_group)
         
+        # Pose Estimation
+        pose_group = QGroupBox("Pose Estimation (Person Detection)")
+        pose_layout = QVBoxLayout(pose_group)
+        
+        self.center_on_person_check = QCheckBox("Center on main person")
+        self.center_on_person_check.setChecked(False)
+        self.center_on_person_check.setToolTip("Find and center the view on the largest detected person")
+        pose_layout.addWidget(self.center_on_person_check)
+        
+        self.pose_based_rotation_check = QCheckBox("Pose-based rotation adjustment")
+        self.pose_based_rotation_check.setChecked(False)
+        self.pose_based_rotation_check.setToolTip("Use pose keypoints to adjust rotation angle")
+        pose_layout.addWidget(self.pose_based_rotation_check)
+        
+        self.save_pose_images_check = QCheckBox("Save pose visualization images")
+        self.save_pose_images_check.setChecked(False)
+        self.save_pose_images_check.setToolTip("Save debug images showing detected pose keypoints")
+        pose_layout.addWidget(self.save_pose_images_check)
+        
+        # Pose model selection
+        pose_model_layout = QHBoxLayout()
+        pose_model_layout.addWidget(QLabel("Pose Model:"))
+        self.pose_model_combo = QComboBox()
+        self.pose_model_combo.addItems([
+            "yolov8n-pose.pt (Fast)",
+            "yolov8s-pose.pt (Small)",
+            "yolov8m-pose.pt (Medium)",
+            "yolov8l-pose.pt (Large)",
+            "yolov8x-pose.pt (Most Accurate)"
+        ])
+        self.pose_model_combo.setCurrentIndex(0)  # Default to nano (fast)
+        pose_model_layout.addWidget(self.pose_model_combo)
+        pose_layout.addLayout(pose_model_layout)
+        
+        layout.addWidget(pose_group)
+        
         # Batch processing settings
         batch_group = QGroupBox("Batch Processing")
         batch_layout = QGridLayout(batch_group)
@@ -399,7 +476,8 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         # Process button
         self.process_btn = QPushButton("🔍 Generate Masks")
         self.process_btn.setEnabled(False)
-        self.process_btn.setMinimumHeight(40)
+        self.process_btn.setMinimumHeight(45)
+        self.process_btn.setMaximumHeight(45)
         self.process_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
@@ -419,15 +497,19 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
+        self.progress_bar.setMinimumHeight(25)
+        self.progress_bar.setMaximumHeight(25)
         layout.addWidget(self.progress_bar)
         
         self.progress_label = QLabel("")
         self.progress_label.setAlignment(Qt.AlignCenter)
+        self.progress_label.setMaximumHeight(30)
         layout.addWidget(self.progress_label)
         
-        layout.addStretch()
+        # Set the scrollable content
+        scroll_area.setWidget(panel)
         
-        return panel
+        return scroll_area
     
     def _create_right_panel(self) -> QWidget:
         """Create the right image display panel."""
@@ -561,6 +643,10 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         
         # Get model name
         model_text = self.model_combo.currentText()
+        # Skip separator items
+        if model_text == "---":
+            QMessageBox.warning(self, "Invalid Model", "Please select a valid YOLO model (not a separator).")
+            return
         model_name = model_text.split(" ")[0]
         
         # Get mask upscale factor
@@ -570,6 +656,10 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
         # Get view resolution
         view_res_text = self.view_res_combo.currentText()
         view_res = int(view_res_text.replace("px", ""))
+        
+        # Get pose model name
+        pose_model_text = self.pose_model_combo.currentText()
+        pose_model_name = pose_model_text.split(" ")[0]
         
         config = PipelineConfig(
             num_horizontal_views=self.num_views_spin.value(),
@@ -582,10 +672,23 @@ class FisheyeMaskGeneratorWindow(QMainWindow):
             dilate_mask=self.dilate_check.isChecked(),
             feather_edges=self.feather_check.isChecked(),
             include_downward_view=self.downward_view_check.isChecked(),
-            mask_upscale_factor=upscale_factor
+            mask_upscale_factor=upscale_factor,
+            center_on_person=self.center_on_person_check.isChecked(),
+            pose_based_rotation=self.pose_based_rotation_check.isChecked(),
+            save_pose_images=self.save_pose_images_check.isChecked(),
+            pose_model_name=pose_model_name
         )
         
         self.pipeline = FisheyeMaskGenerationPipeline(config)
+    
+    def _on_model_changed(self, index: int):
+        """Prevent selection of separator items in model combo."""
+        if self.model_combo.currentText() == "---":
+            # Skip to next valid item
+            if index < self.model_combo.count() - 1:
+                self.model_combo.setCurrentIndex(index + 1)
+            else:
+                self.model_combo.setCurrentIndex(index - 1)
     
     def _on_preset_changed(self, index: int):
         """Handle preset selection change."""
